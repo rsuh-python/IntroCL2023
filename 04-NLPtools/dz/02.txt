@@ -1,0 +1,145 @@
+To generate the motion of the musculoskeletal system, a forward-dynamics
+approach estimates joint moments during movements. In addition, the input
+to the system is the neural excitation, specifying the level of activation in the
+muscles. Musculotendon contraction dynamics transform the muscle activation
+to muscle force, which is then multiplied by muscle moment arms to produce
+the total moment of the joints. From the joint moments, multi-joint dynamics
+compute the accelerations, velocities, and angles of each joint of interest. In
+the model q, the accelerations of the generalized coordinates are dictated by
+the governing equations of motion (Kane & Levinson (1983)):
+M (q)q̈ + C(q) q̇ 2 + G(q) + R(q)F M T + E(q, q̇) = 0
+(1.2)
+where q, q̇, and q̈ are vectors of the generalized coordinates, velocities, and
+accelerations, respectively; M (q) is the system mass matrix and is a vector
+of inertial forces and torques; C(q) q̇ 2 is a vector of centrifugal and Coriolis
+forces and torques; G(q) is a vector of gravitational forces and torques; R(q) is
+the matrix of muscle moment arms, F M T is a vector of musculotendon forces,
+R(q)F M T is a vector of musculotendon torques; and E(q, q̇) is a vector of
+external forces and torques applied to the body by the environment. R(q) can
+be estimated provided that the origin and insertion sites of each muscle-tendon
+unit and the relative positions of the body segments are known. Combining
+equations (1.1) and (1.2), a mathematical model in the forward dynamics is1.5. Machine learning
+9
+obtained to describe how the body motion (q, q̇, q̈) is related to muscle activation
+(a m ).
+A musculoskeletal simulation develops from model dynamic equations,
+starting from a user-specified initial state. Then, new states at small time
+intervals are determined by numerical integration. The process is iterated to
+generate the trajectories of the musculoskeletal model over a definite interval.
+1.5. Machine learning
+ML is a branch of artificial intelligence that applies statistical methods to learn
+and recognize hidden patterns from data without being explicitly programmed
+(Mitchell et al. (1997)). ML algorithms use task-related training data to learn a
+task, which involves mapping the input with the output through a target function.
+The performance of most ML algorithms depends on the data representation,
+and they perform better on tasks if adequate features are provided. However,
+for many tasks, it is difficult to know precisely which features to extract
+(Jordan & Mitchell (2015); Mohri et al. (2018)). Deep learning solves the
+extraction problem by introducing abstract representations and expressing
+simpler representations to extract useful data. Deep learning uses biologically
+inspired networks to represent data to multiple simple ”neurons” through nested
+layers (Yan et al. (2015); Deng & Yu (2014)). The first layer takes the raw
+data as input, and the last layer produces the desired output. Each middle
+layer performs an affine transformation followed by an element-wise nonlinearity
+activation. The affine transformation is done by matrix multiplication using
+the output of the previous layer and the current layer. Although each layer’s
+computation is simple, the architecture composition allows the networks to form
+highly complex and nonlinear representations. Common types of deep networks
+are multilayer perceptron (MLP), convolutional neural networks (CNN), and
+recurrent neural networks. Extension to the reinforcement learning domain is
+another achievement of deep learning.
+1.5.1. Multilayer perceptron
+MLP is the quintessential deep learning model that consists of a network of nodes.
+It is logically similar to biological neurons, comprising of inputs comparable to
+dendrites. MLP is also a summation function similar to the cell body (soma),
+and an output corresponding to the axon (Gardner & Dorling (1998)). An MLP
+consists of three or more layers. The first layer is the input layer, where the
+features are used as the initial input. The middle layers are called hidden layers
+because the input data do not show the desired output of these layers (Ruck
+et al. (1990)). Finally, the output layer produces the desired output. Normally,
+each layer except the input layer performs a nonlinear activation function to
+capture the nonlinear data relationship. An MLP network using a reasonable
+non-linear activation function, such as the logistic and a hidden layer, is a
+universal approximator, in which the continuous functions are approximated to
+enough components with non-zero error (Hornik et al. (1989)).10
+1. Introduction
+1.5.2. Convolutional neural network (CNN)
+CNN is a class of deep neural networks that employ convolution operation instead
+of matrix multiplication to perform an operation (Albawi et al. (2017)). CNN
+is a specialized neural network designed to analyze visual imagery (Lawrence
+et al. (1997)). Normally, a CNN layer comprises three stages (i.e., convolution,
+activation, and pooling). In the first stage, the layer performs a discrete
+convolution over the input. The discrete convolution operation takes a dot
+product between the weights and a small subregion of the inputs. Subsequently,
+the output of the first stage is fed to a nonlinear activation. Finally, a pooling
+function is introduced to modify the output of the layer. Max pooling obtains
+the maximum value of a subregion of output after the layer-wise nonlinear
+activation in the second stage. The pooling stage is the component that makes
+CNN representation become invariant to small input translations.
+1.5.3. Long short-term memory (LSTM)
+LSTM network is a specified recurrent neural network that proves successful in
+many applications, which include handwriting recognition (Greff et al. (2016);
+Wigington et al. (2017); Breuel et al. (2013)) and generation (Graves (2013);
+Kumar et al. (2018); Charbonneau & Shouno (2018)), speech recognition (Graves
+et al. (2013b,a); Li et al. (2015)), and machine translation (Chung et al. (2014);
+Klein et al. (2017)). Hochreiter and Schmidhuber proposed LSTM in 1997 to
+solve the long-term dependency problem in sequential data. Presently, it is
+effective in analyzing sequential data and effective for noisy and non-stationary
+time series prediction and classification. In addition, LSTM introduces self-loops
+to generate paths and assist the gradient flow for long durations (Hochreiter
+& Schmidhuber (1997)). When the weight of the self-loop is controlled by
+another hidden unit, the integration time scale changes dynamically. Three
+major components in an LSTM network are the input gate, the forget gate, and
+the output gate. The input gate decides how much information to add to the
+cell state. The forget gate determines how much information from the previous
+cell state to forget. The output gate controls the information to output based
+on the cell state.
+1.5.4. Reinforcement learning
+RL incorporates an agent interaction to build a model of the environment. RL
+solves decision-making problems and has great potential in a wide range of
+fields in natural science, social sciences, and engineering (Bertsekas & Tsitsiklis
+(1996); Li (2017)). RL learns from interaction by mapping situations to actions
+to maximize a numerical reward signal. In RL, the agent must learn to perform
+a task by trial and error, without guidance from the human operator (Kaelbling
+et al. (1996)). Instead of coding the agent to learn the environment, the agent,
+given the current state, learns to find the optimal action that maximizes rewards
+in the long term. This action, taken by the agent, affects the immediate reward
+and influences all the subsequent rewards. Four elements of RF are the agent,1.5. Machine learning
+11
+the environment, a policy, and a reward function. The agent is the learner
+and decision-maker. However, the agent interacts with the environment, which
+determines the behavior of the agent and maps the observed states of the action.
+In some cases, the policy may be in different formats, such as a function or a
+lookup table. In addition, policies may be stochastic. A reward function defines
+how the reward accumulates over time from the environment. The reward signal
+determines a good choice of policy or not; if an action selected by the policy is
+followed by a low reward, the policy may be a bad choice and should be subject
+to change in the future. In general, reward signals may also be stochastic,
+which is the function of the environment. RL is akin to optimal control whose
+goal is to design a controller to minimize a dynamical system’s behavior. An
+approach to solve the RL problem is to use the dynamical system and a valuable
+function to define a functional equation called the Bellman equation (Bellman
+(1957)). Solved by dynamic programming, the Bellman equation is widely used
+to solve general stochastic optimal control problems. Dynamic programming
+uses analytical solutions to solve the Bellman equation thanks to the accurate
+modeling of the control system. The RL problem can be formulated as a finite
+Markov decision process, or finite MDPs, < S, A, P, R > consisting of states
+a
+0
+S, actions A, the possibilities P s,s
+0 (s, s ∈ S, a ∈ A) where action a taken in
+0
+state s leads to state s , and the expected rewards R as,s 0 received when moving
+from state s to s 0 after performing action a. It can be considered that the agent
+accumulates rewards by interacting with the environment. The agent follows its
+actions according to a deterministic policy π : S → A indicating how an action
+a is chosen in state s. A relevant goal can be to find an optimal policy π such
+that the expected future reward is maximized.
+Thesis structure.
+The thesis is outlined as follows: In Chapter 2, we discuss the thesis
+objectives and the specific aims of four included studies. Chapter 3 will describe
+the experiment protocols including data collection and preparation, simulation
+protocols including simulation environment and the model, the machine learning
+approaches used in the 4 studies, and the evaluation metrics. Chapter 4 presents
+the summary of the results of the four studies. Chapter 5 discusses the results
+and compares the results with similar studies. Chapter 6 concludes the thesis.
