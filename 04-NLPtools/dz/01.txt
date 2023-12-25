@@ -1,0 +1,210 @@
+The study and prediction of human movement can be traced back along a
+fascinating trajectory, to the ancient Greeks, when the famous philosopher
+Aristotle left documented records about human walking (Harris & Smith (2007)).
+Skipping forward to the 19th century, the Weber brothers analyzed gait temporal
+and stride parameters using experimental measurements. In their published
+work, they studied human gait in both mechanical and physiological aspects
+(Kisner et al. (2017)). In recent decades, the study of human motion has
+increased exponentially, thanks to the development of video camera systems
+Gavrila & Davis (1996); Karaulova et al. (2002); Allard et al. (1998); Zatsiorsky
+& Zaciorskij (2002)). Such camera systems, with or without force-sensing
+platforms, make the study of human movement feasible and accurate. They
+are often combined with electromyographic (EMG) sensors and other hardware,
+and can provide important information about the causal relationship between
+muscle activation and resulting human movement, as well as about deviating
+gait patterns that may arise in persons with sensorimotor disorders. They do,
+however, generally require specialized equipment and are often installed in a
+lab, which can limit their applicability in some contexts.
+On this note, other wearable sensors have become prevalent in the past few
+decades, and can complement or even replace video camera systems in some
+settings, making it possible to study human motion in more versatile settings
+(Takeda et al. (2009); Reenalda et al. (2016); Seel et al. (2014b)). These sensors
+are generally cost-effective, non-obtrusive, and can be worn or attached to
+the body, inside or outside of a lab environment. They often include inertial
+measurement units (IMUs), which contain accelerometers, and gyroscopes and
+magnetometers, to measure segment acceleration and angular velocities, as well
+as electromyographic (EMG) sensors to measure muscle excitation and foot
+switches, which detect contact between the foot and the ground. These wearable
+sensors can be donned simultaneously and capture data at a high sampling
+frequency, resulting in a large amount of data.
+Machine learning (ML) is an effective tool to extract prominent features of
+large datasets and make statistical inference from these data. ML has a great
+capability of solving classification, regression, and decision-making problems,
+and as such, can enhance motion analyses through data-driven prediction. As
+12
+1. Introduction
+just a few examples, Derlatka & Bogdan (2015) used K nearest neighbors (KNN)
+to measure the mathematical distance of the IMU data points between different
+gait phases to find similarities. Derlatka & Ihnatouski (2010) applied decision
+tree (DT) technique to estimate foot contact (FC) pressure during walking.
+Martinez-Hernandez et al. (2017) used Bayesian network classifier (NB) to
+recognize daily activities and gait phases.
+Unlike data-driven approaches, musculoskeletal simulation techniques gen-
+erally aim to model the underlying mechanisms of human motion, making it
+possible to interpret interactions between muscular control, kinematics, and
+kinetics involved in human movements. Musculoskeletal models commonly
+represent a complicated neuromuscular control system in which muscles produce
+forces as a function of their architectures, lengths, velocities, and activation lev-
+els. A muscle’s length and velocity is directly related to its attachments, moment
+arms, and joint kinematics, and muscle activation can be approximated from
+experimental data acquisition, specifically EMG signals. There are generally 3
+approaches to simulate human movement using musculoskeletal models, namely
+movement prescription, tracking, and prediction. For prescription and tracking
+methods, motions and forces are recorded with motion capture system, joint
+angles, and velocities are derived through inverse kinematics, and joint torques
+are obtained through inverse dynamics. The muscle force redundancy problem
+is usually solved using optimization approaches, such as static optimization.
+These methods are not capable of generating and predicting new motions in a
+novel environment. In a predictive simulation, new motions can be produced
+through forward simulation, but muscle excitations must be generated first.
+A subset of machine learning, called reinforcement learning, can be useful to
+solve this problem. Reinforcement learning has been used to train controllers to
+drive complex humanoid models, though the resulting behaviors and motion can
+generally be not entirely representative of normal human motion (Heess et al.
+(2017); Peng et al. (2018); Rajeswaran et al. (2017)). Combining reinforcement
+learning with musculoskeletal modeling can help solve for individual muscle
+excitations that produce more natural and realistic human motion.
+This thesis focuses on human gait with wearable sensors and ML techniques.
+First, we leverage the power of ML to predict gait behaviors and locomotion
+modes using large datasets collected from wearable sensors (i.e., foot switches,
+IMUs, and EMG sensors). Finally, we predict human walking in a physics-based
+environment using a gait controller optimized by reinforcement learning (RL)
+with minimal use of domain knowledge.
+1.1. Gait phases
+Gait analysis is the systematic study of bipedal human motion in daily life,
+presenting patterns for limbs and joints during locomotion. Walking is the most
+common mode of locomotion, with an average daily step count of approximately
+9500 in adults (Bohannon (2007)). Although most people can effortlessly
+walk every day, human gait is a complicated behavior that requires concerted1.1. Gait phases
+3
+contributions from the nervous system, muscles, and bones to propel the body
+and to maintain static and dynamic balance. A gait cycle is defined here as
+starting when one foot strikes the ground and ending when the same foot strikes
+the ground again. A gait cycle can be divided into several phases, such as the
+stance phase, when the foot is in contact with the ground, and the swing phase,
+when the limb is in the air. These phases are demarcated by gait events, such
+as ipsilateral (same side) FC, contralateral (opposing side) foot off, etc. Gait
+phases are thus defined as durations between consecutive gait events. Several
+variations have been used to further define gait phases in a gait cycle. We,
+however, use the definitions and five gait cycles developed by Gage et al. (2009)
+(Figure 1.1):
+• loading response, which begins at the ipsilateral FC and ends at the
+contralateral foot-off. This is also the first phase of double support.
+• mid-stance, which begins at the contralateral foot off and ends at the
+rise of the ipsilateral heel.
+• terminal stance, which begins at the ipsilateral heel rise and ends at
+contralateral FC.
+• pre-swing, which begins at the contralateral FC and ends at the ipsilateral
+foot off. This is also the second phase of double support.
+• swing, which begins at the ipsilateral foot off and ends at the ipsilateral
+FC.
+Figure 1.1: A gait schematic describing 5 gait phases for the right side: loading re-
+sponse (LR), mid-stance (MS), terminal stance (TS), pre-swing (PSw), and swing
+(Sw). This figure was generated in the open-source software SCONE (Geijten-
+beek (2019)).
+During loading response (LR), the heel acts as a first rocker, wherein the
+heel usually contacts the ground, the ankle plantarflexes to control forefoot
+contact and the knee flexes for shock absorption. In the mid-stance (MS) phase,
+the tibia advances over the stationary foot through ankle dorsiflexion, while the
+knee and hip extend. In the terminal stance (TS) phase, the center of pressure
+advances forward along the forefoot. In pre-swing (PSw), the final phase of
+stance, the limb prepares to leave the ground and advance into swing (Sw).
+The first four phases have also been described according to the foot and ankle
+function by Perry & Davids (1992) as heel rocker, ankle rocker, forefoot rocker,4
+1. Introduction
+and toe rocker, respectively. During the swing (SW) phase, the ipsilateral leg is
+advanced as the hip flexes and the knee first flexes to achieve foot clearance
+then extends to prepare the leg for the next FC.
+Studies have shown that during different gait phases, activity from many
+muscles can be decomposed into a linear combination of basic functions (Lac-
+quaniti et al. (2012); Chvatal & Ting (2013); d’Avella & Lacquaniti (2013)),
+which vary when the gait speed and modes change. Thus, it is important to
+identify characteristics of the gait phases during different walking speeds. In
+addition, accurate gait phase identification is fundamental for controlling active
+lower limb assistive devices, e.g., exoskeletons, in rehabilitation or treatment of
+people with disabilities that affect walking ability. Martini et al. (2019) provided
+hip flexor assistance during swing to reduce the energy cost of locomotion, using
+a powered hip exoskeleton called the Active Pelvis Orthosis. Kazerooni et al.
+(2006) divided a gait cycle into a ”loaded” stance phase and an ”unloaded” swing
+phase, and hybrid control was applied in an exoskeleton called the Berkeley
+Lower Extremity Exoskeleton. Position control was used during stance, and
+positive feedback control was applied during swing. Furthermore, assistive
+device users should be able to not only walk on level ground but also uneven
+terrains as well as ramps and stairs. These different gaits are referred to here
+as different locomotion modes, and include level-ground walking, ramp/stair
+ascent, and ramp/stair descent. Powered exoskeletons must be designed and
+developed to adjust device impedance, maintain stability, and provide the proper
+torque to generate smooth limb and joint motion throughout the gait cycle in
+various locomotion modes (Sup et al. (2008); Eilenberg et al. (2010); Lusardi
+et al. (2013); Tucker et al. (2015)). Thus, detecting gait phases, gait events and
+locomotion modes is crucial for seamless control of lower limb exoskeletons.
+1.2. Gait trajectory
+The term gait trajectory, or gait kinematics, refers to the positions, velocities,
+and accelerations of body segments and/or joints as a function of time during
+walking. Gait trajectory is collected via motion capture systems and/or wearable
+sensors and analyzed in three anatomical planes, i.e., sagittal, frontal, and
+transverse planes. The ability to predict body segments trajectories can help
+to solve many problems in movement science, such as tripping, slipping, and
+loss of balance (Lencioni et al. (2019); Hobbelen & Wisse (2007); Yang et al.
+(2019)). The application in focus in this thesis is the design and control of
+wearable assistive devices. In such exoskeletons, trajectory-tracking controllers
+are widely adopted to create repetitive motion patterns (Bharadwaj et al.
+(2005)). Tagliamonte et al. (2019) proposed a novel control algorithm for torque-
+controlled exoskeletons, in which the exerted torque timing depended on the
+angular velocity variation. Specifically, the higher the angular velocity, the
+shorter the time the controller is active. Pan et al. (2019) built a 4-motor
+control system to apply torque to the hip and knee using joint angular velocities
+as a speed command. Thus, angular velocity forms a suitable basis to develop
+fine exoskeleton control.1.3. Wearable sensors
+5
+1.3. Wearable sensors
+To describe human walking, three types of data are considered: kinematics,
+kinetics, and EMG. Kinematics data include orientation and displacement of
+body segments, joint angles, and joint angular velocities. Kinetics data include
+ground reaction forces, and can include joint torques and powers. Muscle
+activation patterns are analyzed through the EMG signals associated with
+an ensemble of action potentials in the nervous system (Merletti & Di Torino
+(1999)). The use of wearable sensors to analyze human motion is growing rapidly,
+owing to their portability, low cost, and low processing power (Heikenfeld et al.
+(2018); Mukhopadhyay (2014)). For example, foot switches are widely used to
+detect gait events such as FC and toe-off (TO), as they detect contact between
+the foot and the floor as on-off signals (Hausdorff et al. (1995); Bamberg et al.
+(2008)). IMUs and EMG sensors are widely used as inputs to algorithms for
+human motion discrimination. In addition, the data fusion of these sensors has
+attracted extensive research interest.
+1.3.1. Foot switches
+Foot switches are a golden standard for gait phase recognition since they can
+detect FC with the ground during a gait cycle (Abdul Razak et al. (2012)).
+Foot switches generally consist of piezoresistive sensors, which are placed under
+the sole. They can also be embedded into footwear to measure FC. There are
+often between 2 and 4 foot switches placed under the foot, and each registers a
+different voltage upon contact with the ground. The extend of FC can then be
+deduced from the total voltage registered (Figure 1.2). Foot switches can be
+equipped with ML, with or without signal processing, for automatic gait phase
+recognition in able-bodied subjects and in persons with gait pathology (Howell
+et al. (2013); Zhang et al. (2019)).
+1.3.2. IMUs
+IMUs are widely used wearable sensors in gait analysis. IMUs are electronic
+devices that combine accelerometers, gyroscopes, and magnetometers to measure
+segment acceleration, angular velocity, and magnetic field intensity of three
+orthogonal axes. IMUs can, for instance, be attached to the foot, shank, thigh
+and pelvis to measure segment and joint kinematics during gait. Accelerometers
+and gyroscopes can measure the linear acceleration and angular rate of joint
+segments, and magnetometers provide a reference for body orientation, as their
+signals are insensitive to dynamic motions. Therefore, such a device is suitable
+for estimating and determining changes in the lower extremity segment relative
+to the magnetic North or the vertical axis in gait analysis (Tao et al. (2012)).
+Many studies use IMUs for gait phase recognition. Bejarano et al. (2014)
+proposed an adaptive algorithm based on inertial and magnetic sensors to detect
+gait events. They reported excellent performance in people with and without
+gait pathology. From IMU data, Qi et al. (2015) detected foot displacement and
+classified heel strike, heel off, TO, and mid-swing gait phases during different6
+1. Introduction
+Figure 1.2: A representative foot switch signal on the right foot during level-
+ground walking.
+walking speeds. They found no significant variation in recognition accuracy
+between different walking speeds. Seel et al. (2014a) proposed a real-time
+method to detect gait events using accelerometers and gyroscopes. They based
+their algorithm on setting a specific threshold for foot acceleration and angular
+velocity for each gait event. They reported that 95% of gait events were correctly
+identified, despite the variation between subjects and walking velocities.
